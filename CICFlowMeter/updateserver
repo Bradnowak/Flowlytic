@@ -1,0 +1,33 @@
+#!/bin/bash
+
+IDENTITY_FILE=$1
+CIC_FLOW_METER_ZIP=CICFlowMeter-4.0.zip
+CIC_FLOW_METER=CICFlowMeter-4.0/
+BUILD_DIST_DIR=./build/distributions
+EC2_USER=ec2-user
+ML_SERVER_HOSTNAME=ec2-54-224-12-1.compute-1.amazonaws.com
+ML_SERVER_DIR=/home/ec2-user/mlserver
+TEST_FILE=ISCX_Botnet-Training.pcap_Flow.csv
+
+echo '$1'
+
+if [ -d ${BUILD_DIST_DIR}/${CIC_FLOW_METER} ]
+then
+
+    echo "${CIC_FLOW_METER} already unzipped..."
+
+else
+
+    unzip ${BUILD_DIST_DIR}/${CIC_FLOW_METER_ZIP} -d ${BUILD_DIST_DIR}/${CIC_FLOW_METER}
+fi
+
+rsync -av -e 'ssh -i ${IDENTITY_FILE}' ${BUILD_DIST_DIR}/${CIC_FLOW_METER} ${EC2_USER}@${ML_SERVER_HOSTNAME}:${ML_SERVER_DIR}/${CIC_FLOW_METER}
+
+rsync -av -e 'ssh -i ${IDENTITY_FILE}' ./${TEST_FILE} ${EC2_USER}@${ML_SERVER_HOSTNAME}:${ML_SERVER_DIR}/${TEST_FILE}
+
+# scp -i ${IDENTITY_FILE} ./build/distributions/${CIC_FLOW_METER_ZIP} ${EC2_USER}@${ML_SERVER_HOSTNAME}:${ML_SERVER_DIR}/${CIC_FLOW_METER_ZIP}
+
+# This is only needed for testing
+# scp -i ${IDENTITY_FILE} ./${TEST_FILE} ${EC2_USER}@${ML_SERVER_HOSTNAME}:${ML_SERVER_DIR}/${TEST_FILE}
+
+# ssh -i ${IDENTITY_FILE} ${EC2_USER}@${ML_SERVER_HOSTNAME} "cd ${ML_SERVER_DIR}; unzip ${CIC_FLOW_METER_ZIP}"
